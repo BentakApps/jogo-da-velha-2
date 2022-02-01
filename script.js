@@ -87,6 +87,10 @@ window.addEventListener('resize', () => {
 canvas.addEventListener('mousedown', e => cliqueMouse(e));
 canvas.addEventListener('mousemove', e => moveMouse(e));
 canvas.addEventListener('mouseup', e => soltaMouse(e));
+canvas.addEventListener('touchstart', e => cliqueMouse(e));
+canvas.addEventListener('touchmove', e => moveMouse(e));
+canvas.addEventListener('touchend', e => soltaMouse(e));
+
 desenhaCanvas();
 window.requestAnimationFrame(t => desenhaTudo(t));
 
