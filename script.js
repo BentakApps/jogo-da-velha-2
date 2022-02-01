@@ -326,7 +326,7 @@ function checaVencedor(){
       diagonalSecundaria = 1;
    }
    let pecasRestantes = 0;
-   let empate = true;
+   let empate = true;''
    for(k=0; k<3; k++) {
       for(l=0; l<3; l++){
          pecasRestantes += pecas[1][k][l];
@@ -337,6 +337,7 @@ function checaVencedor(){
    }
    if(vencedorTemp == null && (empate || pecasRestantes == 0)) vencedorTemp = 0;
    // console.log(vencedorTemp);
+   if(vencedorTemp !== null) jogador = 0;
    return vencedorTemp;
 }
 
@@ -420,7 +421,8 @@ let desenhaJogadas = () => {
    ctx.strokeStyle = '#00ff00';
    if(jogador == 1){
       ctx.rect(inicioTabuleiro + espessura/2, espessura/2, tamanhoTabuleiro - espessura, margem * tamanhoCanvas - espessura);
-   } else {
+   }
+   if(jogador == -1){
       ctx.rect(inicioTabuleiro + espessura/2, inicioTabuleiro + tamanhoTabuleiro + espessura/2, tamanhoTabuleiro - espessura, margem * tamanhoCanvas - espessura);
    }
    ctx.stroke();
@@ -509,7 +511,7 @@ function desenhaSelecionado(t){
             tempoInicial = null;
             vencedor = checaVencedor();
             //console.log(vencedor);
-            jogador = -ia;
+            if(vencedor == null) jogador = -ia;
             return;
          }
          selecionado.x = x0 + deltaX * deltaT;

@@ -29,6 +29,7 @@ function escolheJogada(tabuleiro, pecas, jogador, profundidadeMaxima){
                   }
                }
                let ponto = minimax(tabuleiro, pecas, jogador, 0, false, profundidadeMaxima);
+               //console.log(i,j,k,ponto);
                if(ponto > melhorPonto) {
                   melhorPonto = ponto;
                   jogada = {i:i,j:j,k:k,ponto:ponto};
@@ -58,9 +59,9 @@ function minimax(tabuleiro, pecas, jogador, profundidade, maximiza, profundidade
       // console.log("profundidade:" + profundidade);
       if(resultado == 0) return 0;
       if(resultado == jogador){
-         return Infinity;
+         return 1000;
       } else {
-         return -Infinity;
+         return -1000;
       }
    }
    if(profundidade > profundidadeMaxima) {
