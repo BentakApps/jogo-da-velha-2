@@ -16,7 +16,9 @@ let espessura;
 let jogador = 1;
 let vencedor = null;
 let ia = 0;
-let selecionado = {i: null, j:null, k:null, l:null, x:null, y:null, peca:null, jogador:null};
+let selecionado;
+limpaSelecionado();
+let desvioTouch;
 
 let pecas = {
    "1": [[1,1,1],[1,1,1],[1,1,1]],
@@ -84,12 +86,12 @@ window.addEventListener('resize', () => {
    vencedor = checaVencedor();
 });
 
-canvas.addEventListener('mousedown', e => cliqueMouse(e));
-canvas.addEventListener('mousemove', e => moveMouse(e));
-canvas.addEventListener('mouseup', e => soltaMouse(e));
-canvas.addEventListener('touchstart', e => cliqueMouse(e));
-canvas.addEventListener('touchmove', e => moveMouse(e));
-canvas.addEventListener('touchend', e => soltaMouse(e));
+canvas.addEventListener('mousedown', e => cliqueMouse(posicaoMouse(e)));
+canvas.addEventListener('mousemove', e => moveMouse(posicaoMouse(e)));
+canvas.addEventListener('mouseup', e => soltaMouse(posicaoMouse(e)));
+canvas.addEventListener('touchstart', e => cliqueMouse(posicaoTouch(e)));
+canvas.addEventListener('touchmove', e => moveMouse(posicaoTouch(e)));
+canvas.addEventListener('touchend', e => soltaMouse(posicaoTouch(e)));
 
 desenhaCanvas();
 window.requestAnimationFrame(t => desenhaTudo(t));
@@ -110,16 +112,9 @@ function desenhaCanvas(){
    quadrado = tamanhoTabuleiro / 3;
    espessura = quadrado / 20
    ctx.lineWidth = espessura;
+   desvioTouch = quadrado / 2;
    desenhaTabuleiro();
 }
-   // desenhaJogadas();
-   // mudaJogador(jogador);
-   // if(jogoIniciado){
-   //    menu.setAttribute("style", "display: none;");
-   // } else {
-   //    menu.setAttribute("style", "display: flex;");
-   // }
-   // }
 
 function desenhaTudo(t){
    ctx.clearRect(0,0,tamanhoCanvas,tamanhoCanvas);
@@ -131,12 +126,11 @@ function desenhaTudo(t){
    window.requestAnimationFrame(desenhaTudo);
 }
 
-function cliqueMouse(e){
-   //console.log(vencedor);
+function cliqueMouse(pos){
+   //console.log(pos);
    if(jogoIniciado){
       if(vencedor != null){
          //reinicia jogo
-         //mudaJogador(1);
          jogador = 1;
          vencedor = null;
          tabuleiro = [
@@ -154,14 +148,13 @@ function cliqueMouse(e){
          diagonalPrincipal = null;
          diagonalSecundaria = null;
 
-         selecionado = {i: null, j:null, k:null, l:null, x:null, y:null, peca:null, jogador:null};
+         limpaSelecionado();
          
          profundidadeMaxima = 3;
          if(ia == 1) inteligencia.postMessage({tabuleiro:tabuleiro, pecas:pecas, jogador:jogador, profundidadeMaxima:profundidadeMaxima});
          return;
       }
 
-      let pos = posicaoCursor(e);
       if(pos.y <= inicioTabuleiro && jogador == 1){
          procura:
          for(let k = 0; k < 3; k++){
@@ -175,19 +168,12 @@ function cliqueMouse(e){
                   selecionado.peca = pecas[jogador][k][l];
                   selecionado.x = pos.x;
                   selecionado.y = pos.y;
+                  selecionado.origem = pos.origem;
                   pecas[jogador][k][l] = 0;
                   break procura;
                }
             }
          }
-         // ctx.clearRect(0, 0, tamanhoCanvas, tamanhoCanvas);
-         // desenhaTabuleiro();
-         // desenhaJogadas();
-         // ctx.beginPath();
-         // ctx.fillStyle = 'blue';
-         // let raio = ((selecionado.k/10 + margem) * tamanhoCanvas)/8
-         // ctx.ellipse(pos.x, pos.y, raio, raio,0,0,2*Math.PI);
-         // ctx.fill();
       }
       if(pos.y >= inicioTabuleiro + tamanhoTabuleiro && jogador == -1){
          procura:
@@ -202,94 +188,72 @@ function cliqueMouse(e){
                   selecionado.peca = pecas[jogador][k][l];
                   selecionado.x = pos.x;
                   selecionado.y = pos.y;
+                  selecionado.origem = pos.origem;
                   pecas[jogador][k][l] = 0;
                   break procura;
                }
             }
          }
-         // ctx.clearRect(0, 0, tamanhoCanvas, tamanhoCanvas);
-         // desenhaTabuleiro();
-         // desenhaJogadas();
-         // ctx.beginPath();
-         // ctx.fillStyle = 'red';
-         // let raio = ((selecionado.k/10 + margem) * tamanhoCanvas)/8
-         // ctx.ellipse(pos.x, pos.y, raio, raio,0,0,2*Math.PI);
-         // ctx.fill();
       }
    }
 }
-function moveMouse(e){
+function moveMouse(pos){
+   //console.log(pos);
    if(selecionado.jogador !== null && jogador !== ia){
-      // ctx.clearRect(0, 0, tamanhoCanvas, tamanhoCanvas);
-      // desenhaTabuleiro();
-      // desenhaJogadas();
-      
-      let pos = posicaoCursor(e);
       selecionado.x = pos.x;
       selecionado.y = pos.y;
-      // ctx.beginPath();
-      // if(selecionado.jogador == 1) {
-      //    ctx.fillStyle = 'blue';
-      // } else {
-      //    ctx.fillStyle = 'red';
-      // }
-      // let raio = ((selecionado.k/10 + margem) * tamanhoCanvas)/8
-      // ctx.ellipse(pos.x, pos.y, raio, raio,0,0,2*Math.PI);
-      // ctx.fill();
    }
 }
 
-function soltaMouse(e){
+function soltaMouse(pos){
    if(selecionado.jogador !== null && jogador !== ia){
-      let pos = posicaoCursor(e);
-      if(pos.y > inicioTabuleiro && pos.y < inicioTabuleiro + tamanhoTabuleiro &&
-         pos.x > inicioTabuleiro && pos.x < inicioTabuleiro + tamanhoTabuleiro){ 
+      //let pos = posicaoCursor(e);
+      if(pos.y - (selecionado.origem == "touch" ? desvioTouch * -jogador : 0) > inicioTabuleiro &&
+         pos.y - (selecionado.origem == "touch" ? desvioTouch * -jogador : 0) < inicioTabuleiro + tamanhoTabuleiro &&
+         pos.x - (selecionado.origem == "touch" ? desvioTouch : 0) > inicioTabuleiro &&
+         pos.x - (selecionado.origem == "touch" ? desvioTouch : 0) < inicioTabuleiro + tamanhoTabuleiro){ 
          if(Math.abs(tabuleiro[pos.i][pos.j]) < Math.abs(selecionado.k) + 10){
             tabuleiro[pos.i][pos.j] = jogador * (10 + selecionado.k);
-            // ctx.clearRect(0, 0, tamanhoCanvas, tamanhoCanvas);
-            // setTimeout(()=>{
-            //    desenhaTabuleiro();
-            //    desenhaJogadas();
-            // },10);            
-            //desenhaPeca(pos.i,pos.j,selecionado.k,selecionado.jogador);
-            selecionado = {i:null, j:null, k:null, l:null, x:null, y:null, peca:null, jogador:null};
-            //desenhaTudo();
+            limpaSelecionado();
             vencedor = checaVencedor();
             if(vencedor == null){
                jogador = -jogador;
-               //mudaJogador(-jogador);
                if(ia == jogador){
                   inteligencia.postMessage({tabuleiro:tabuleiro, pecas:pecas, jogador:jogador, profundidadeMaxima:profundidadeMaxima});
-                  //setTimeout(escolheJogada(),1000);
-                  //escolheJogada();
                }
             }
          } else {
             pecas[selecionado.jogador][selecionado.k][selecionado.l] = selecionado.peca;
-            //voltaPeca();
          }
       } else {
          pecas[selecionado.jogador][selecionado.k][selecionado.l] = selecionado.peca;
-         //voltaPeca();
       }
-      selecionado = {i: null, j:null, k:null, l:null, x:null, y:null, peca:null, jogador:null};
+      limpaSelecionado();
    }
 }
 
-//let voltaPeca = () => {
-   //ctx.clearRect(0, 0, tamanhoCanvas, tamanhoCanvas);
-   // pecas[selecionado.jogador][selecionado.k][selecionado.l] = selecionado.peca;
-   // return;
-   // desenhaTabuleiro();
-   // desenhaJogadas();
-//}
-
-function posicaoCursor(e){
+function posicaoMouse(e){
    let x = e.offsetX;
    let y = e.offsetY
    let i = Math.floor((x - inicioTabuleiro) / quadrado);
    let j = Math.floor((y - inicioTabuleiro) / quadrado);
-   return {x:x, y:y, i:i, j:j};
+   return {x:x, y:y, i:i, j:j, origem:"mouse"};
+}
+
+function posicaoTouch(e){
+   //console.log(e);
+   //console.log(e.target.getBoundingClientRect());
+   let x,y;
+   if(e.type == "touchend"){
+      x = e.changedTouches[e.changedTouches.length-1].clientX - e.target.getBoundingClientRect().left;
+      y = e.changedTouches[e.changedTouches.length-1].clientY - e.target.getBoundingClientRect().top;
+   } else {
+      x = e.touches[0].clientX - e.target.getBoundingClientRect().left;
+      y = e.touches[0].clientY - e.target.getBoundingClientRect().top;
+   }
+   let i = Math.floor((x - desvioTouch - inicioTabuleiro) / quadrado);
+   let j = Math.floor((y - desvioTouch * -jogador - inicioTabuleiro) / quadrado);
+   return {x:x, y:y, i:i, j:j, origem:"touch"};
 }
 
 function checaVencedor(){
@@ -375,6 +339,9 @@ let jogadorO = () => {
    inteligencia.postMessage({tabuleiro:tabuleiro, pecas:pecas, jogador:jogador, profundidadeMaxima:profundidadeMaxima});
 }
 
+function limpaSelecionado(){
+   selecionado = {i: null, j:null, k:null, l:null, x:null, y:null, peca:null, jogador:null, origem:null};
+}
 function desenhaTabuleiro(){
    fundo.beginPath();
    fundo.lineWidth = espessura;
@@ -422,6 +389,7 @@ let desenhaJogadas = () => {
 
    //Desenha jogador atual
    ctx.beginPath();
+   ctx.lineWidth = espessura / 2;
    ctx.strokeStyle = '#00ff00';
    if(jogador == 1){
       ctx.rect(inicioTabuleiro + espessura/2, espessura/2, tamanhoTabuleiro - espessura, margem * tamanhoCanvas - espessura);
@@ -434,19 +402,6 @@ let desenhaJogadas = () => {
    
 
 }
-
-// let desenhaX = (i,j) => {
-//    let cantoX = i * quadrado;
-//    let cantoY = j * quadrado;
-//    let margem = (quadrado - quadrado * escala) / 2;
-//    ctx.beginPath();
-//    ctx.strokeStyle = "#000000";
-//    ctx.moveTo(cantoX + margem, cantoY + margem);
-//    ctx.lineTo(cantoX + margem + quadrado * escala, cantoY + margem + quadrado * escala);
-//    ctx.moveTo(cantoX + margem + quadrado * escala, cantoY + margem);
-//    ctx.lineTo(cantoX + margem, cantoY + margem + quadrado * escala);
-//    ctx.stroke();
-// }
 
 let desenhaPeca = (i, j, tamanho, jogador) => {
    //console.log(i, j, tamanho, jogador);
@@ -464,36 +419,6 @@ let desenhaPeca = (i, j, tamanho, jogador) => {
    ctx.fill();
 }
 
-// //Desenha linhas vencedoras
-// let desenhaLinha = i => {
-//    ctx.beginPath();
-//    ctx.strokeStyle = "#ff0000";
-//    ctx.moveTo(inicioTabuleiro, inicioTabuleiro + i * quadrado + quadrado / 2);
-//    ctx.lineTo(inicioTabuleiro + tamanhoTabuleiro, inicioTabuleiro + i * quadrado + quadrado / 2);
-//    ctx.stroke();
-// }
-// let desenhaColuna = i => {
-//    ctx.beginPath();
-//    ctx.strokeStyle = "#ff0000";
-//    ctx.moveTo(inicioTabuleiro + i * quadrado + quadrado / 2, inicioTabuleiro);
-//    ctx.lineTo(inicioTabuleiro + i * quadrado + quadrado / 2, inicioTabuleiro + tamanhoTabuleiro);
-//    ctx.stroke();
-// }
-// let desenhaDiagonalPrincipal = () => {
-//    ctx.beginPath();
-//    ctx.strokeStyle = "#ff0000";
-//    ctx.moveTo(inicioTabuleiro, inicioTabuleiro);
-//    ctx.lineTo(inicioTabuleiro + tamanhoTabuleiro, inicioTabuleiro + tamanhoTabuleiro);
-//    ctx.stroke();
-// }
-// let desenhaDiagonalSecundaria = () => {
-//    ctx.beginPath();
-//    ctx.strokeStyle = "#ff0000";
-//    ctx.moveTo(inicioTabuleiro, inicioTabuleiro + tamanhoTabuleiro);
-//    ctx.lineTo(inicioTabuleiro + tamanhoTabuleiro, inicioTabuleiro);
-//    ctx.stroke();
-// }
-
 function desenhaSelecionado(t){
    if(selecionado.jogador !== null){
       if(selecionado.jogador == ia){
@@ -507,7 +432,7 @@ function desenhaSelecionado(t){
          let deltaT = t - tempoInicial;
          if(deltaT>1000){
             tabuleiro[selecionado.i][selecionado.j] = selecionado.jogador * (selecionado.k + 10);
-            selecionado = {i: null, j:null, k:null, l:null, x:null, y:null, peca:null, jogador:null};
+            limpaSelecionado();
             x0 = 0;
             y0 = 0;
             deltaX = 0;
@@ -528,7 +453,10 @@ function desenhaSelecionado(t){
       }
       let raio = ((selecionado.k/10 + margem) * tamanhoCanvas)/8
       ctx.beginPath();
-      ctx.ellipse(selecionado.x, selecionado.y, raio, raio,0,0,2*Math.PI);
+      ctx.ellipse(
+         selecionado.x - (selecionado.origem == "touch" ? desvioTouch : 0),
+         selecionado.y - (selecionado.origem == "touch" ? desvioTouch * -jogador : 0),
+         raio, raio,0,0,2*Math.PI);
       ctx.fill();
    }
 }
@@ -546,6 +474,7 @@ function desenhaProgresso(){
 function desenhaResultado(){
    if(linha != null){
       ctx.beginPath();
+      ctx.lineWidth = espessura /2;
       ctx.strokeStyle = "#00ff00";
       ctx.moveTo(inicioTabuleiro, inicioTabuleiro + linha * quadrado + quadrado / 2);
       ctx.lineTo(inicioTabuleiro + tamanhoTabuleiro, inicioTabuleiro + linha * quadrado + quadrado / 2);
@@ -553,6 +482,7 @@ function desenhaResultado(){
    }
    if(coluna != null){
       ctx.beginPath();
+      ctx.lineWidth = espessura *2;
       ctx.strokeStyle = "#00ff00";
       ctx.moveTo(inicioTabuleiro + coluna * quadrado + quadrado / 2, inicioTabuleiro);
       ctx.lineTo(inicioTabuleiro + coluna * quadrado + quadrado / 2, inicioTabuleiro + tamanhoTabuleiro);
@@ -560,6 +490,7 @@ function desenhaResultado(){
    }
    if(diagonalPrincipal){
       ctx.beginPath();
+      ctx.lineWidth = espessura /2;
       ctx.strokeStyle = "#00ff00";
       ctx.moveTo(inicioTabuleiro, inicioTabuleiro);
       ctx.lineTo(inicioTabuleiro + tamanhoTabuleiro, inicioTabuleiro + tamanhoTabuleiro);
@@ -567,6 +498,7 @@ function desenhaResultado(){
    }
    if(diagonalSecundaria){
       ctx.beginPath();
+      ctx.lineWidth = espessura / 2;
       ctx.strokeStyle = "#00ff00";
       ctx.moveTo(inicioTabuleiro, inicioTabuleiro + tamanhoTabuleiro);
       ctx.lineTo(inicioTabuleiro + tamanhoTabuleiro, inicioTabuleiro);
@@ -581,23 +513,3 @@ function desenhaResultado(){
       ctx.fillText("EMPATE", tamanhoCanvas / 2, tamanhoCanvas / 2);
    }
 }
-
-
-// function atualizaProgresso(valor){
-//    let completo = valor / 26;
-//    console.log(completo);
-// }
-//Inicializa jogo
-//resizeCanvas();
-
-
-//
-//
-//
-///
-//
-//
-//
-//
-////
-//

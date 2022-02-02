@@ -29,7 +29,7 @@ function escolheJogada(tabuleiro, pecas, jogador, profundidadeMaxima){
                   }
                }
                let ponto = minimax(tabuleiro, pecas, jogador, 0, false, profundidadeMaxima);
-               //console.log(i,j,k,ponto);
+               console.log(i,j,k,ponto);
                if(ponto > melhorPonto) {
                   melhorPonto = ponto;
                   jogada = {i:i,j:j,k:k,ponto:ponto};

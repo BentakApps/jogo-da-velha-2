@@ -8,29 +8,30 @@
    <link rel="stylesheet" href="style.css">
    <title>Jogo da Velha</title>
 </head>
-
 <body>
-   <div class="canvas-div">
-   <canvas></canvas>
-   <div id="menu">
-      <p>
-         Escolha o modo de jogo
-      </p>
-      <div class="buttons">
-         <div class="wrapper" onclick = "doisJogadores()">
-            <div class="button two">2 jogadores</div>
-         </div>
-         <div class="wrapper" onclick = "jogadorX()">
-            <div class="button X"></div>
-         </div>
-         <div class="wrapper" onclick = "jogadorO()">
-            <div class="button O"></div>
+   <div class="main-wrapper">
+      <div class="canvas-div">
+         <canvas></canvas>
+         <div id="menu">
+            <p>
+               Escolha o modo de jogo
+            </p>
+            <div class="buttons">
+               <div class="wrapper" onclick = "doisJogadores()">
+                  <div class="button two">2 jogadores</div>
+               </div>
+               <div class="wrapper" onclick = "jogadorX()">
+                  <div class="button X"></div>
+               </div>
+               <div class="wrapper" onclick = "jogadorO()">
+                  <div class="button O"></div>
+               </div>
+            </div>
+            <p>
+               Azul começa jogando
+            </p>
          </div>
       </div>
-      <p>
-         Azul começa jogando
-      </p>
-   </div>
    </div>
    <script src="script.js"></script>
 </body>

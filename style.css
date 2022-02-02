@@ -14,13 +14,36 @@ html, body {
    width: 100%;
    height: 100%;
    margin: 0;
+   background-color: #777777;
+   z-index: 1;
 }
 
+body, .main-wrapper {
+   /* Break the flow */
+  position: absolute;
+  top: 0px;
+
+  /* Give them all the available space */
+  width: 100%;
+  height: 100%;
+
+  /* Remove the margins if any */
+  margin: 0;
+
+  /* Allow them to scroll down the document */
+  overflow-y: hidden;
+}
+
+.main-wrapper {
+   /* Making the wrapper stack above the body */
+   z-index: 2;
+}
 .canvas-div{
    position: absolute;
    left: 50%;
    top: 50%;
    transform: translate(-50%, -50%);
+   background-color: #777777;
    /* display: flex;
    justify-content: center;
    align-items: center; */
