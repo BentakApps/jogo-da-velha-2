@@ -482,7 +482,7 @@ function desenhaResultado(){
    }
    if(coluna != null){
       ctx.beginPath();
-      ctx.lineWidth = espessura *2;
+      ctx.lineWidth = espessura /2;
       ctx.strokeStyle = "#00ff00";
       ctx.moveTo(inicioTabuleiro + coluna * quadrado + quadrado / 2, inicioTabuleiro);
       ctx.lineTo(inicioTabuleiro + coluna * quadrado + quadrado / 2, inicioTabuleiro + tamanhoTabuleiro);
