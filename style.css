@@ -43,7 +43,7 @@ body, .main-wrapper {
    left: 50%;
    top: 50%;
    transform: translate(-50%, -50%);
-   background-color: #777777;
+   background-color: #93ffa7 !important;
    /* display: flex;
    justify-content: center;
    align-items: center; */
